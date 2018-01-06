@@ -1,0 +1,3 @@
+rootProject.name = 'neekerbot'
+rootProject.buildFileName = 'build.gradle.kts'
+
