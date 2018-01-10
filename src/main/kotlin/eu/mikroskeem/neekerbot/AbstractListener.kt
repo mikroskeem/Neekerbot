@@ -12,7 +12,6 @@ import com.jtelegram.api.events.message.MessageEvent
 import com.jtelegram.api.events.message.TextMessageEvent
 import com.jtelegram.api.user.User
 import java.util.Locale
-import java.util.regex.Pattern
 import kotlin.reflect.KClass
 
 /**
@@ -25,7 +24,7 @@ interface Listener<T: Event>: EventHandler<T> {
 
     override fun onEvent(event: T) {
         if(event is MessageEvent<*>) {
-            if(currentUnixTime - event.message.date < 15)
+            if((currentUnixTime - event.message.date) > 15)
                 return
         }
 
