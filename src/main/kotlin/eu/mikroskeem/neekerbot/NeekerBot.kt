@@ -10,6 +10,7 @@ import eu.mikroskeem.neekerbot.commands.AlwaysCommand
 import eu.mikroskeem.neekerbot.commands.DadJokeCommand
 import eu.mikroskeem.neekerbot.commands.DoRubyCommand
 import eu.mikroskeem.neekerbot.commands.SummonCommand
+import eu.mikroskeem.neekerbot.listeners.LoggingListener
 import okhttp3.OkHttpClient
 import java.net.URL
 import javax.script.ScriptEngineManager
@@ -45,6 +46,8 @@ fun registerBot() {
         bot registerCommand SummonCommand::class
 
         // Register listeners here
+        bot registerListener LoggingListener::class
+
         bot registerListener TextContainsListener(listOf("neeger")) { _, chat, _, messageId, _ ->
             bot.sendText(chat, "iksdeeeeee", replyTo = messageId)
         }
