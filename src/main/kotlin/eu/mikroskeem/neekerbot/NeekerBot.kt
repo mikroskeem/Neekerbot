@@ -56,5 +56,9 @@ fun registerBot() {
         bot registerListener TextRegexListener("(?i)r(e)\\1{3,}") { _, chat, _, messageId, _ ->
             bot.sendDocument(chat, URL("https://i.imgur.com/raxpPZa.gif"), replyTo = messageId)
         }
+
+        bot registerListener TextEqualsListener("kp") { _, chat, _, messageId, _ ->
+            bot.sendText(chat, "tra need 2 sõna kirjutatakse välja kuradi autist", replyTo = messageId)
+        }
     }
 }

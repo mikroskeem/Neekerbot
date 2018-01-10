@@ -34,6 +34,17 @@ interface Listener<T: Event>: EventHandler<T> {
     }
 }
 
+class TextEqualsListener(val word: String, val ignoreCase: Boolean = true,
+                           private val handler: (bot: TelegramBot, chat: Chat, sender: User, messageId: Int, text: String) -> Unit
+): Listener<TextMessageEvent> {
+    override val eventType = TextMessageEvent::class
+    override val shouldHandle: (TextMessageEvent) -> Boolean = { event ->
+        event.message.content.run { if(ignoreCase) toLowerCase(Locale.ENGLISH) else this } == word
+    }
+
+    override fun handle(event: TextMessageEvent) = handler(event.bot, event.message.chat, event.message.sender, event.message.messageId, event.message.content)
+}
+
 class TextContainsListener(val words: List<String>, val ignoreCase: Boolean = true,
                            private val handler: (bot: TelegramBot, chat: Chat, sender: User, messageId: Int, text: String) -> Unit
 ): Listener<TextMessageEvent> {
