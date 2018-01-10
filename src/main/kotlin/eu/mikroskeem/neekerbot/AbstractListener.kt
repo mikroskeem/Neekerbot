@@ -8,6 +8,7 @@ import com.jtelegram.api.TelegramBot
 import com.jtelegram.api.chat.Chat
 import com.jtelegram.api.events.Event
 import com.jtelegram.api.events.EventHandler
+import com.jtelegram.api.events.message.MessageEvent
 import com.jtelegram.api.events.message.TextMessageEvent
 import com.jtelegram.api.user.User
 import java.util.Locale
@@ -23,6 +24,11 @@ interface Listener<T: Event>: EventHandler<T> {
     fun handle(event: T)
 
     override fun onEvent(event: T) {
+        if(event is MessageEvent<*>) {
+            if(currentUnixTime - event.message.date < 15)
+                return
+        }
+
         if(shouldHandle(event))
             handle(event)
     }
