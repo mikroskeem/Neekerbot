@@ -4,15 +4,13 @@
 
 package eu.mikroskeem.neekerbot
 
-import ch.jamiete.mcping.MinecraftPing
-import ch.jamiete.mcping.MinecraftPingOptions
 import com.jtelegram.api.TelegramBotRegistry
-import com.jtelegram.api.commands.filters.CommandFilter
-import com.jtelegram.api.events.message.TextMessageEvent
-import com.jtelegram.api.message.input.file.ExternalInputFile
-import com.jtelegram.api.requests.message.send.SendPhoto
-import com.jtelegram.api.requests.message.send.SendText
 import com.jtelegram.api.update.PollingUpdateProvider
+import eu.mikroskeem.neekerbot.commands.AlwaysCommand
+import eu.mikroskeem.neekerbot.commands.DadJokeCommand
+import eu.mikroskeem.neekerbot.commands.DoRubyCommand
+import eu.mikroskeem.neekerbot.commands.SummonCommand
+import okhttp3.OkHttpClient
 import java.net.URL
 import javax.script.ScriptEngineManager
 
@@ -32,92 +30,31 @@ val registry = TelegramBotRegistry.builder()
         .updateProvider(PollingUpdateProvider())
         .build()
 
-val sm = ScriptEngineManager()
-val jruby = sm.getEngineByName("jruby")
+val jruby = ScriptEngineManager().getEngineByName("jruby")
+val okhttp = OkHttpClient.Builder().build()
 
 fun registerBot() {
     registry.registerBot(KEY) { bot, error ->
         if(error != null)
             throw error
 
+        // Register commands here
+        bot registerCommand AlwaysCommand::class
+        bot registerCommand DadJokeCommand::class
+        bot registerCommand DoRubyCommand::class
+        bot registerCommand SummonCommand::class
 
-        bot.eventRegistry.registerEvent(TextMessageEvent::class.java) {
-            println(it.message.content)
-            if(it.message.content.contains("neeger", ignoreCase = true)) {
-                bot.perform(SendText.builder()
-                        .chatId(it.message.chat.chatId)
-                        .replyToMessageID(it.message.messageId)
-                        .text("iksdeeeeee")
-                        .build()
-                )
-            }
+        // Register listeners here
+        bot registerListener TextContainsListener(listOf("neeger")) { _, chat, _, messageId, _ ->
+            bot.sendText(chat, "iksdeeeeee", replyTo = messageId)
         }
 
-        bot.commandRegistry.registerCommand(CommandFilter { event, command ->
-            when(command.baseCommand) {
-                "kys" -> {
-                    bot.perform(SendText.builder()
-                            .chatId(event.message.chat.chatId)
-                            .replyToMessageID(event.message.messageId)
-                            .text("no u")
-                            .build()
-                    )
-                }
-                "always" -> {
-                    bot.perform(SendPhoto.builder()
-                            .chatId(event.message.chat.chatId)
-                            .photo(ExternalInputFile(URL("https://i.imgur.com/BoVfl7R.png")))
-                            .build()
-                    )
-                }
-                "summon" -> {
-                    bot.perform(SendText.builder()
-                            .chatId(event.message.chat.chatId)
-                            .text("@Ciukoer")
-                            .build()
-                    )
-                }
-                "doruby" -> {
-                    val result = jruby.eval(command.argsAsText).toString()
-                    bot.perform(SendText.builder()
-                            .chatId(event.message.chat.chatId)
-                            .replyToMessageID(event.message.messageId)
-                            .text(result)
-                            .build()
-                    )
-                }
-                "ping" -> {
-                    if(command.args.size < 1) {
-                        bot.perform(SendText.builder()
-                                .chatId(event.message.chat.chatId)
-                                .replyToMessageID(event.message.messageId)
-                                .text("Usage: <ip> [port]")
-                                .build()
-                        )
-                    } else {
-                        val ip = command.args[0]!!
-                        val port: Int = if(command.args.size > 1) command.args[1]?.toIntOrNull() ?: 25565 else 25565
+        bot registerListener TextContainsListener(listOf("lel")) { _, chat, _, messageId, _ ->
+            bot.sendDocument(chat, URL("https://i.imgur.com/fZVzuQh.gif"), replyTo = messageId)
+        }
 
-                        val result = MinecraftPing().getPing(MinecraftPingOptions()
-                                .setHostname(ip)
-                                .setPort(port)
-                        )
-
-                        val text = """
-                        ${result.description?.text} - ${result.players?.run { "$online/$max" }}
-                        """
-
-                        bot.perform(SendText.builder()
-                                .chatId(event.message.chat.chatId)
-                                .replyToMessageID(event.message.messageId)
-                                .text(text)
-                                .build()
-                        )
-                    }
-                }
-            }
-
-            return@CommandFilter true
-        })
+        bot registerListener TextRegexListener("(?i)r(e)\\1{3,}") { _, chat, _, messageId, _ ->
+            bot.sendDocument(chat, URL("https://i.imgur.com/raxpPZa.gif"), replyTo = messageId)
+        }
     }
 }
