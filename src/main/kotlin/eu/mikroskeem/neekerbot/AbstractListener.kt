@@ -33,32 +33,34 @@ interface Listener<T: Event>: EventHandler<T> {
     }
 }
 
-class TextEqualsListener(val word: String, val ignoreCase: Boolean = true,
-                           private val handler: (bot: TelegramBot, chat: Chat, sender: User, messageId: Int, text: String) -> Unit
+open class TextEqualsListener(val words: List<String>, val ignoreCase: Boolean = true,
+                              private val handler: ((bot: TelegramBot, chat: Chat, sender: User, messageId: Int, text: String) -> Unit)? = null
 ): Listener<TextMessageEvent> {
     override val eventType = TextMessageEvent::class
     override val shouldHandle: (TextMessageEvent) -> Boolean = { event ->
-        event.message.content.run { if(ignoreCase) toLowerCase(Locale.ENGLISH) else this } == word
+        words.any { event.message.content.run { if(ignoreCase) toLowerCase(Locale.ENGLISH) else this } == it }
     }
 
-    override fun handle(event: TextMessageEvent) = handler(event.bot, event.message.chat, event.message.sender, event.message.messageId, event.message.content)
+    override fun handle(event: TextMessageEvent) { handler?.run { this(event.bot, event.message.chat, event.message.sender, event.message.messageId, event.message.content) } ?: throw IllegalStateException("${this.javaClass}#handle was not overriden!") }
 }
 
-class TextContainsListener(val words: List<String>, val ignoreCase: Boolean = true,
-                           private val handler: (bot: TelegramBot, chat: Chat, sender: User, messageId: Int, text: String) -> Unit
+open class TextContainsListener(val words: List<String>, val ignoreCase: Boolean = true,
+                                private val handler: ((bot: TelegramBot, chat: Chat, sender: User, messageId: Int, text: String) -> Unit)? = null
 ): Listener<TextMessageEvent> {
     override val eventType = TextMessageEvent::class
     override val shouldHandle: (TextMessageEvent) -> Boolean = { event ->
-        words.any { event.message.content.run { if(ignoreCase) toLowerCase(Locale.ENGLISH) else this }.contains(it) }
+        words.any { event.message.content.split(" ").map { if(ignoreCase) it.toLowerCase(Locale.ENGLISH) else it }.contains(it) }
     }
 
-    override fun handle(event: TextMessageEvent) = handler(event.bot, event.message.chat, event.message.sender, event.message.messageId, event.message.content)
+    override fun handle(event: TextMessageEvent) { handler?.run { this(event.bot, event.message.chat, event.message.sender, event.message.messageId, event.message.content) } ?: throw IllegalStateException("${this.javaClass}#handle was not overriden!") }
 }
 
-class TextRegexListener(pattern: String, private val handler: (bot: TelegramBot, chat: Chat, sender: User, messageId: Int, text: String) -> Unit): Listener<TextMessageEvent> {
+open class TextRegexListener(pattern: String,
+                             private val handler: ((bot: TelegramBot, chat: Chat, sender: User, messageId: Int, text: String) -> Unit)? = null
+): Listener<TextMessageEvent> {
     private val regex = Regex(pattern)
     override val eventType = TextMessageEvent::class
     override val shouldHandle: (TextMessageEvent) -> Boolean = { it.message.content.matches(regex) }
 
-    override fun handle(event: TextMessageEvent) = handler(event.bot, event.message.chat, event.message.sender, event.message.messageId, event.message.content)
+    override fun handle(event: TextMessageEvent) { handler?.run { this(event.bot, event.message.chat, event.message.sender, event.message.messageId, event.message.content) } ?: throw IllegalStateException("${this.javaClass}#handle was not overriden!") }
 }

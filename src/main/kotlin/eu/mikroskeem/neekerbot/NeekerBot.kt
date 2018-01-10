@@ -11,6 +11,7 @@ import eu.mikroskeem.neekerbot.commands.DadJokeCommand
 import eu.mikroskeem.neekerbot.commands.DoRubyCommand
 import eu.mikroskeem.neekerbot.commands.SummonCommand
 import eu.mikroskeem.neekerbot.listeners.LoggingListener
+import eu.mikroskeem.neekerbot.listeners.NeegerTextListener
 import okhttp3.OkHttpClient
 import java.net.URL
 import javax.script.ScriptEngineManager
@@ -47,10 +48,7 @@ fun registerBot() {
 
         // Register listeners here
         bot registerListener LoggingListener::class
-
-        bot registerListener TextContainsListener(listOf("neeger")) { _, chat, _, messageId, _ ->
-            bot.sendText(chat, "iksdeeeeee", replyTo = messageId)
-        }
+        bot registerListener NeegerTextListener::class
 
         bot registerListener TextContainsListener(listOf("lel")) { _, chat, _, messageId, _ ->
             bot.sendDocument(chat, URL("https://i.imgur.com/fZVzuQh.gif"), replyTo = messageId)
@@ -60,7 +58,7 @@ fun registerBot() {
             bot.sendDocument(chat, URL("https://i.imgur.com/raxpPZa.gif"), replyTo = messageId)
         }
 
-        bot registerListener TextEqualsListener("kp") { _, chat, _, messageId, _ ->
+        bot registerListener TextEqualsListener(listOf("kp")) { _, chat, _, messageId, _ ->
             bot.sendText(chat, "tra need 2 sõna kirjutatakse välja kuradi autist", replyTo = messageId)
         }
     }

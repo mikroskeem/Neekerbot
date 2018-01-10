@@ -13,6 +13,7 @@ import com.jtelegram.api.requests.message.send.SendPhoto
 import com.jtelegram.api.requests.message.send.SendText
 import java.net.URL
 import java.time.Instant
+import java.util.Random
 import kotlin.reflect.KClass
 
 /**
@@ -21,8 +22,10 @@ import kotlin.reflect.KClass
  * @author Mark Vainomaa
  */
 
+val random = Random()
 val currentUnixTime: Long get() = Instant.now().epochSecond
 val List<String>.argsAsString get() = this.joinToString(separator = " ")
+fun <T> List<T>.getRandomElement(): T = this[random.nextInt(size)]
 
 infix fun TelegramBot.registerCommand(command: Command) = this.commandRegistry.registerCommand(command.commandName, command)
 infix fun <T: Command> TelegramBot.registerCommand(command: KClass<T>) = registerCommand(command.java.getConstructor().newInstance())
